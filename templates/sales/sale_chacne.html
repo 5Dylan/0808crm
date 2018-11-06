@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>营销机会管理</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+</head>
+<body>
+<div style="margin:5px 0;"></div>
+<table id="dg" class="easyui-datagrid" title="营销机会管理"
+       data-options="rownumbers:true,pagination:true,fit:true,
+			    pageList:[10,15,20,30,40,50],toolbar: '#tb',
+                url:'{% url 'sales:select_sale_chacne_list' %}',method:'post'">
+    <thead>
+    <tr>
+        <th data-options="field:'id',checkbox:true"></th>
+        <th data-options="field:'khno',width:90">客户编号</th>
+        <th data-options="field:'customerName',width:184">客户名称</th>
+        <th data-options="field:'overview',width:180">概要</th>
+        <th data-options="field:'createMan',width:90">创建人</th>
+        <th data-options="field:'linkManName',width:90">联系人</th>
+        <th data-options="field:'linkPhone',width:100">联系电话</th>
+        <th data-options="field:'assignMan',width:90">分配给谁</th>
+        <th data-options="field:'assignTime',width:130,formatter:formatter_datetime">分配时间</th>
+        <th data-options="field:'state',width:80,formatter:formatter_state">状态</th>
+        <th data-options="field:'devResult',width:80,formatter:formatter_devResult">开发状态</th>
+    </tr>
+    </thead>
+</table>
+
+{# 工具栏 #}
+<div id="tb">
+    {% if '101001' in request.session.user_permission %}
+    <a onclick="open_sale_chance_dialog();" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加</a>
+    {% endif %}
+    {% if '101002' in request.session.user_permission %}
+    <a onclick="open_sale_chance_update_dialog();" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">修改</a>
+    {% endif %}
+    {% if '101003' in request.session.user_permission %}
+    <a onclick="delete_sale_chance();" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除</a>
+    {% endif %}
+    <div>
+        客户名称&nbsp;&nbsp;<input id="customerName" onkeydown="if (event.keyCode==13) select_params_sela_chance();"/>
+        &nbsp;&nbsp;概要&nbsp;&nbsp;<input id="overview" onkeydown="if (event.keyCode==13) select_params_sela_chance();"/>
+        &nbsp;&nbsp;创建人&nbsp;&nbsp;<input id="createMan"
+                                          onkeydown="if (event.keyCode==13) select_params_sela_chance();"/>
+        &nbsp;&nbsp;分配状态&nbsp;&nbsp;
+        <select class="easyui-combobox" id="state" style="width: 100px">
+            <option value="">全部</option>
+            <option value="0">未分配</option>
+            <option value="1">已分配</option>
+        </select>&nbsp;&nbsp;
+        <a id="btn" onclick="select_params_sela_chance();" class="easyui-linkbutton"
+           data-options="iconCls:'icon-search'">查询</a>
+    </div>
+</div>
+
+{# 添加营销机会对话框 #}
+<div id="sales_sale_chance_create_dialog" class="easyui-dialog">
+    <form id="sales_sale_chance_form" method="post">
+        <input type="hidden" id="csrfmiddlewaretoken" name="csrfmiddlewaretoken"/>
+        <table cellpadding="10px">
+            <tr>
+                <td style="padding-right: 10px">客户名称</td>
+                <td>
+                    <input type="hidden" id="customerName_hidden" name="customerName_hidden">
+                    <select onchange="get_customerName();" id="customer_select" name="customerId" style="width: 173px"></select>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">机会来源</td>
+                <td><input name="chanceSource"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">联系人</td>
+                <td>
+                    <input type="hidden" id="linkManName_hidden" name="linkManName">
+                    <select onchange="get_linkName();" name="linkMan" id="linkman_select" style="width: 173px"></select>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">联系电话</td>
+                <td>
+                    <input readonly id="linkPhone" name="linkPhone"/>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">成功几率(%)</td>
+                <td colspan="3"><input name="cgjl"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">概要</td>
+                <td colspan="3"><input name="overview" style="width: 500px"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">机会描述</td>
+                <td colspan="3"><textarea name="description" style="width: 498px;height: 100px"></textarea></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">指派给</td>
+                <td colspan="3">
+                    <select name="username" id="username_select" style="width: 173px"></select>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+{# 修改营销机会对话框 #}
+<div id="sales_sale_chance_update_dialog" class="easyui-dialog">
+    <form id="sales_sale_chance_update_form" method="post">
+        <input type="hidden" id="id" name="id"/>
+        <table cellpadding="10px">
+            <tr>
+                <td style="padding-right: 10px">客户名称</td>
+                <td>
+                    <input type="hidden" id="update_customerName_hidden" name="customerName">
+                    <select onchange="get_update_customerName();" id="update_customer_select" name="customerId" style="width: 173px"></select>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">机会来源</td>
+                <td><input id="update_chanceSource" name="chanceSource"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">联系人</td>
+                <td>
+                    <select onchange="get_update_linkName();" name="linkMan" id="update_linkman_select" style="width: 173px"></select>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">联系电话</td>
+                <td>
+                    <input readonly id="update_linkPhone" name="linkPhone"/>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">成功几率(%)</td>
+                <td colspan="3"><input id="update_cgjl" name="cgjl"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">概要</td>
+                <td colspan="3"><input id="update_overview" name="overview" style="width: 500px"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">机会描述</td>
+                <td colspan="3"><textarea id="update_description" name="description" style="width: 498px;height: 100px"></textarea></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">指派给</td>
+                <td colspan="3">
+                    <select name="assignMan" id="update_username_select" style="width: 173px"></select>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+<script type="text/javascript" src="{% static '/js/sales/sale_chance.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/jquery.cookie.js' %}"></script>
+</html>

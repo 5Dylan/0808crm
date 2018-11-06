@@ -25,12 +25,18 @@ SECRET_KEY = '_6(o-2@fpb+x4k+d3gu&dm-!cipb3+n@bbf(37o*e3rbivof79'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'report',
+    'serve',
+    'base',
+    'customer',
+    'sales',
+    'system',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'crm.common.CrmExceptionMiddleware',
+    'crm.common.CrmUrlMiddleware'
 ]
 
 ROOT_URLCONF = 'crm.urls'

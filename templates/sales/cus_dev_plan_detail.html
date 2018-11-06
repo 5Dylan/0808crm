@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>客户开发计划详细页</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+    <script type="text/javascript" src="{% static "/jquery-easyui-1.3.3/jquery.edatagrid.js" %}"></script>
+</head>
+<body>
+<div id="sales_sale_chance_create_dialog" class="easyui-panel" title="营销机会信息"
+     style="width: 660px">
+    <form id="sales_sale_chance_form" method="post">
+        <input type="hidden" value="{{ sc.id }}" id="sale_chance_id"/>
+        <table cellpadding="10px">
+            <tr>
+                <td style="padding-right: 10px">客户名称</td>
+                <td>
+                    <input readonly value="{{ sc.customerName }}">
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">机会来源</td>
+                <td><input readonly value="{{ sc.chanceSource }}"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">联系人</td>
+                <td>
+                    <input readonly value="{{ sc.linkManName }}"/>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">联系电话</td>
+                <td>
+                    <input readonly value="{{ sc.linkPhone }}"/>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">成功几率(%)</td>
+                <td colspan="3"><input readonly value="{{ sc.cgjl }}"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">概要</td>
+                <td colspan="3"><input readonly value="{{ sc.overview }}" style="width: 500px"/></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">机会描述</td>
+                <td colspan="3"><textarea readonly style="width: 498px;height: 100px">{{ sc.description }}</textarea>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">创建人</td>
+                <td>
+                    <input readonly readonly value="{{ sc.createMan }}"/>
+                </td>
+                <td style="padding-right: 10px">创建时间</td>
+                <td>
+                    <input readonly readonly value="{{ sc.createDate|date:'Y-m-d H-i-s' }}"/>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">指派给</td>
+                <td>
+                    <input readonly value="{{ sc.assignMan }}"/>
+                </td>
+                <td style="padding-right: 10px">指派时间</td>
+                <td>
+                    <input readonly readonly value="{{ sc.assignTime|date:'Y-m-d H-i-s' }}"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<table id="tt" style="width:660px;height:400px" class="easyui-datagrid"
+       title="添加开发计划项" singleSelect="true" toolbar="#tb">
+    <thead>
+    <tr>
+        <th field="id" width="50">编号</th>
+        <th field="planDate" width="150" editor="{type:'datebox',options:{required:true}}">日期</th>
+        <th field="planItem" width="230" align="center" editor="{type:'validatebox',options:{required:true}}">计划内容</th>
+        <th field="exeAffect" width="230" align="center" editor="{type:'validatebox',options:{required:true}}">执行效果</th>
+    </tr>
+    </thead>
+</table>
+{# 工具栏 #}
+{% if '1' == flag %}
+    <div id="tb">
+        <a onclick="add();" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加计划</a>
+        <a onclick="cancel();" class="easyui-linkbutton" data-options="iconCls:'icon-undo',plain:true">取消计划</a>
+        <a onclick="save();" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存计划</a>
+        <a onclick="destroy();" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除计划</a>
+        <a onclick="update_dev_result(2);" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">开发成功</a>
+        <a onclick="update_dev_result(3);" class="easyui-linkbutton" data-options="iconCls:'icon-zzkf',plain:true">开发失败</a>
+    </div>
+{% endif %}
+<script type="text/javascript" src="{% static '/js/sales/cus_dev_plan_detail.js' %}"></script>
+</body>
+</html>

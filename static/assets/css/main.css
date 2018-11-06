@@ -3521,3 +3521,13 @@ pre {
     display: none;
   }
 }
+
+/**
+ * 添加注册提示信息样式
+ */
+#reg_span, #login_span {
+  color: red;
+  display: block;
+  padding-left: 20px;
+  padding-bottom: 10px;
+}

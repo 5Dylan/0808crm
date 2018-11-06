@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/jquery.cookie.js' %}"></script>
+</head>
+<body>
+<div style="margin:5px 0;"></div>
+<table id="dg" class="easyui-datagrid" title="用户管理"
+       data-options="rownumbers:true,pagination:true,fit:true,
+			    pageList:[10,15,20,30,40,50],toolbar: '#tb',
+                url:'{% url 'system:select_user' %}',method:'get'">
+    <thead>
+    <tr>
+        <th data-options="field:'id',checkbox:true"></th>
+        <th data-options="field:'username',width:300,align:'center'">用户名</th>
+        <th data-options="field:'truename',width:200,align:'center'">真实姓名</th>
+        <th data-options="field:'email',width:200">邮件</th>
+        <th data-options="field:'phone',width:180">联系电话</th>
+        <th data-options="field:'create_date',width:180">创建时间</th>
+    </tr>
+    </thead>
+</table>
+
+{# 工具栏 #}
+<div id="tb">
+    <a onclick="open_user_create_dialgo();" class="easyui-linkbutton"
+       data-options="iconCls:'icon-add',plain:true">添加</a>
+    <a onclick="open_user_update_dialgo();" class="easyui-linkbutton"
+       data-options="iconCls:'icon-edit',plain:true">修改</a>
+    <a onclick="delete_user();" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除</a>
+    <div>
+        用户名&nbsp;&nbsp;<input id="s_username" onkeydown="if (event.keyCode==13) select_user();"/>
+        <a id="btn" onclick="select_user();" class="easyui-linkbutton"
+           data-options="iconCls:'icon-search'">查询</a>
+    </div>
+</div>
+
+{# 用户对话框 #}
+<div id="dialog" class="easyui-dialog" data-options="iconCls:'icon-save',resizable:false,modal:true,
+    draggable: false,closed: true,buttons: '#tt'" style="width: 680px;height: 230px;">
+    <form id="fm" method="post">
+        <input type="hidden" id="id" name="id"/>
+        <table cellpadding="10px">
+            <tr>
+                <td style="padding-left: 50px">用户名</td>
+                <td>
+                    <input id="username" name="username" class="easyui-validatebox" data-options="required:true"/>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">密码</td>
+                <td>
+                    <input id="password" name="password" class="easyui-validatebox"/>
+                    <span id="pwd_span" style="color: red;padding-left: 10px">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-left: 50px">真实姓名</td>
+                <td>
+                    <input id="truename" name="truename" class="easyui-validatebox" data-options="required:true"/>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">邮箱</td>
+                <td>
+                    <input id="email" name="email" class="easyui-validatebox" data-options="required:true"/>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-left: 50px">联系电话</td>
+                <td>
+                    <input id="phone" name="phone" class="easyui-validatebox" data-options="required:true"/>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 70px;padding-right: 10px">角色</td>
+                <td>
+                    <!-- <input type="hidden" id="roles_hidden" name="roles_hidden"/> -->
+                    <input id="roles" name="roles" class="easyui-combobox" data-options="valueField:'id',textField:'roleName',editable:false,
+                        url:'{% url 'system:select_role_for_user' %}',method:'get',multiple:true">
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="tt">
+    <a onclick="save_user();" class="easyui-linkbutton" data-options="iconCls:'icon-save'">保存</a>
+    <a onclick="close_user_dialgo();" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'">关闭</a>
+</div>
+<script type="text/javascript" src="{% static '/js/system/user.js' %}"></script>
+</body>
+</html>

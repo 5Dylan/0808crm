@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>服务处理</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/jquery.cookie.js' %}"></script>
+</head>
+<body>
+<table id="dg" class="easyui-datagrid" title="服务处理管理"
+       data-options="rownumbers:true,pagination:true,fit:true,
+			    pageList:[10,15,20,30,40,50],toolbar: '#tb',
+                url:'{% url 'serve:select_serve' %}?state=已分配',method:'get'">
+    <thead>
+    <tr>
+        <th data-options="field:'id',checkbox:true"></th>
+        <th data-options="field:'customer',width:200">客户名称</th>
+        <th data-options="field:'overview',width:300">概要</th>
+        <th data-options="field:'serveType',width:100">服务类型</th>
+        <th data-options="field:'createPeople',width:120">创建人</th>
+        <th data-options="field:'createDate',width:150,formatter:formatter_datetime">创建时间</th>
+        <th data-options="field:'assigner',width:120">分配人</th>
+        <th data-options="field:'assignTime',width:150,formatter:formatter_datetime">分配时间</th>
+    </tr>
+    </thead>
+</table>
+
+{# 工具栏 #}
+<div id="tb">
+    <a onclick="open_serve_dialog();" class="easyui-linkbutton" data-options="iconCls:'icon-fwcl',plain:true">处理</a>
+</div>
+
+{# 分配处理对话框 #}
+<div id="dialog" class="easyui-dialog" iconCls="icon-fwcl">
+    <br/>
+    <form id="fm" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="id"/>
+        <input type="hidden" name="state" value="已处理"/>
+        <label style="padding-right: 12px;padding-left: 30px">服务类型</label>
+        <input id="serveType" name="serveType" readonly/>
+        <label style="padding-right: 10px;padding-left: 10px">客户名称</label>
+        <input id="customer" name="customer" readonly/><br/><br/>
+        <label style="padding-right: 38px;padding-left: 30px">概要</label>
+        <input id="overview" name="overview" style="width: 414px" readonly/><br/><br/>
+        <label style="padding-right: 14px;padding-left: 30px">服务请求</label>
+        <textarea id="serviceRequest" name="serviceRequest" readonly style="width: 414px;height: 60px"></textarea><br/><br/>
+        <label style="padding-right: 30px;padding-left: 30px">创建人</label><input readonly id="createPeople" name="createPeople"/>
+        <label style="padding-right: 20px;padding-left: 10px">创建时间</label><input readonly id="createDate" name="createDate"/><br/><br/>
+        <label style="padding-right: 30px;padding-left: 30px">分配人</label>
+        <input id="assigner" name="assigner" class="easyui-combobox"
+               data-options="valueField:'username',textField:'username',value:'请选分配人',editable:false,
+               url:'{% url 'system:select_customer_manager' %}',method:'get'"><br/><br/>
+        <label style="padding-right: 14px;padding-left: 30px">服务处理</label>
+        <textarea id="serviceProce" name="serviceProce" style="width: 414px;height: 60px" class="easyui-validatebox" data-options="required:true"></textarea><br/><br/>
+        <label style="padding-right: 25px;padding-left: 30px">处理人</label>
+        <input type="hidden" id="session_username" value="{{ request.session.username_session }}"/>
+        <input readonly id="serviceProcePeople" name="serviceProcePeople"/>
+    </form>
+</div>
+<script type="text/javascript" src="{% static '/js/serve/serve_common.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/serve/serve_handler.js' %}"></script>
+</body>
+</html>

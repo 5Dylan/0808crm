@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>客户信息管理</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+</head>
+<body>
+<div style="margin:5px 0;"></div>
+<table id="dg" class="easyui-datagrid" title="客户信息管理"
+       data-options="rownumbers:true,pagination:true,fit:true,
+			    pageList:[10,15,20,30,40,50],toolbar: '#tb',
+                url:'{% url 'customer:select_customer_list' %}',method:'get'">
+    <thead data-options="frozen:true">
+    <tr>
+        <th data-options="field:'id',checkbox:true"></th>
+        <th data-options="field:'khno',width:150">客户编号</th>
+        <th data-options="field:'name',width:180">客户名称</th>
+        <th data-options="field:'cusManager',width:100">客户经理</th>
+        <th data-options="field:'level',width:90">客户等级</th>
+        <th data-options="field:'phone',width:100">联系电话</th>
+    </tr>
+    </thead>
+    <thead>
+    <tr>
+        <th data-options="field:'area',width:60">客户地区</th>
+        <th data-options="field:'myd',width:60">满意度</th>
+        <th data-options="field:'xyd',width:60">信用度</th>
+        <th data-options="field:'address',width:150">地址</th>
+        <th data-options="field:'postCode',width:60">邮编</th>
+        <th data-options="field:'fax',width:80">传真</th>
+        <th data-options="field:'website',width:120">网址</th>
+        <th data-options="field:'yyzzzch',width:150">营业注册号</th>
+        <th data-options="field:'fr',width:80">法人</th>
+        <th data-options="field:'zczj',width:80">注册资金</th>
+        <th data-options="field:'nyye',width:150">年营业额</th>
+        <th data-options="field:'khyh',width:60">开户银行</th>
+        <th data-options="field:'khzh',width:150">开户账号</th>
+        <th data-options="field:'dsdjh',width:80">地税</th>
+        <th data-options="field:'gsdjh',width:80">国税</th>
+        <th data-options="field:'state',width:80,formatter:formatter_state">状态</th>
+        <th data-options="field:'createDate',width:150,formatter:formatter_datetime">创建时间</th>
+        <th data-options="field:'updateDate',width:150,formatter:formatter_datetime">修改时间</th>
+    </tr>
+    </thead>
+</table>
+
+{# 工具栏 #}
+<div id="tb">
+    <a onclick="open_customer_create_dialog();" class="easyui-linkbutton"
+       data-options="iconCls:'icon-add',plain:true">添加</a>
+    <a onclick="open_customer_update_dialog();" class="easyui-linkbutton"
+       data-options="iconCls:'icon-edit',plain:true">修改</a>
+    <a onclick="delete_customer();" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除</a>
+    <a onclick="open_linkman_window();" class="easyui-linkbutton"
+       data-options="iconCls:'icon-lxr',plain:true">联系人管理</a>
+    <a onclick="open_contact_window();" class="easyui-linkbutton"
+       data-options="iconCls:'icon-jwjl',plain:true">交往记录管理</a>
+    <a onclick="open_order_window();" class="easyui-linkbutton" data-options="iconCls:'icon-lsdd',plain:true">历史订单查看</a>
+    <div>
+        &nbsp;&nbsp;客户名称&nbsp;&nbsp;<input id="customer_name" onkeydown="if (event.keyCode==13) select_params_customer();"/>
+        &nbsp;&nbsp;客户编号&nbsp;&nbsp;<input id="customer_khno" onkeydown="if (event.keyCode==13) select_params_customer();"/>
+        &nbsp;&nbsp;状态&nbsp;&nbsp;
+        <select class="easyui-combobox" id="customer_state" style="width: 100px">
+            <option value="">全部</option>
+            <option value="0">正常</option>
+            <option value="1">暂时流失</option>
+            <option value="2">确认流失</option>
+        </select>&nbsp;&nbsp;
+        <a id="btn" onclick="select_params_customer();" class="easyui-linkbutton"
+           data-options="iconCls:'icon-search'">查询</a>
+    </div>
+</div>
+<input type="hidden" id="flag"/>
+<div id="customer_dialog" class="easyui-dialog">
+    <form id="customer_form" method="post">
+        <input type="hidden" id="csrfmiddlewaretoken" name="csrfmiddlewaretoken"/>
+        <input type="hidden" id="id" name="id"/>
+        <input type="hidden" id="khno" name="khno"/>
+        <table cellpadding="5px">
+            <tr>
+                <td style="padding-right: 10px">客户名称</td>
+                <td>
+                    <input id="name" name="name" class="easyui-validatebox" data-options="required:true"/>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 50px;">地区</td>
+                <td>
+                    <select id="area" name="area" class="easyui-combobox" style="width: 170px">
+                        <option value="">请选择地区</option>
+                        <option value="北京">北京</option>
+                        <option value="上海">上海</option>
+                        <option value="广州">广州</option>
+                        <option value="深圳">深圳</option>
+                        <option value="杭州">杭州</option>
+                    </select><span style="color: red;padding-left: 10px">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">客户经理</td>
+                <td>
+                    <input id="cusManager" name="cusManager"/><span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 50px;">客户等级</td>
+                <td>
+                    <input id="level" name="level" class="easyui-combobox"
+                           data-options="valueField:'dataDicValue',textField:'dataDicValue',value:'请选择客户等级',editable:false,
+                                url:'{% url 'base:select_customer_level' %}?dic_name=客户等级',method:'get'">
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td>客户满意度</td>
+                <td>
+                    <select id="myd" name="myd" class="easyui-combobox" style="width: 170px">
+                        <option value="">请选择客户满意度</option>
+                        <option value="☆">☆</option>
+                        <option value="☆☆">☆☆</option>
+                        <option value="☆☆☆">☆☆☆</option>
+                        <option value="☆☆☆☆">☆☆☆☆</option>
+                        <option value="☆☆☆☆☆">☆☆☆☆☆</option>
+                    </select>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+                <td style="padding-left: 50px">客户信用度</td>
+                <td>
+                    <select id="xyd" name="xyd" class="easyui-combobox" style="width: 170px">
+                        <option value="">请选择客户信用度</option>
+                        <option value="☆">☆</option>
+                        <option value="☆☆">☆☆</option>
+                        <option value="☆☆☆">☆☆☆</option>
+                        <option value="☆☆☆☆">☆☆☆☆</option>
+                        <option value="☆☆☆☆☆">☆☆☆☆☆</option>
+                    </select>
+                    <span style="color: red;padding-left: 10px">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">邮政编码</td>
+                <td><input id="postCode" name="postCode"/><span style="color: red;padding-left: 10px">*</span></td>
+                <td style="padding-left: 50px">联系电话</td>
+                <td><input id="phone" name="phone"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">传真</td>
+                <td><input id="fax" name="fax"/><span style="color: red;padding-left: 10px">*</span></td>
+                <td style="padding-left: 50px">网址</td>
+                <td><input id="website" name="website"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">客户地址</td>
+                <td colspan="3"><input id="address" name="address" style="width: 496px;"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">营业执照注册号</td>
+                <td><input id="yyzzzch" name="yyzzzch"/></td>
+                <td style="padding-left: 50px">法人</td>
+                <td><input id="fr" name="fr"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">注册资金(万元)</td>
+                <td><input id="zczj" name="zczj"/></td>
+                <td style="padding-left: 50px">年营业额</td>
+                <td><input id="nyye" name="nyye"/><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">开户银行</td>
+                <td><input id="khyh" name="khyh" /><span style="color: red;padding-left: 10px">*</span></td>
+                <td style="padding-left: 50px">开户账号</td>
+                <td><input id="khzh" name="khzh" /><span style="color: red;padding-left: 10px">*</span></td>
+            </tr>
+            <tr>
+                <td style="padding-right: 10px">地税登记号</td>
+                <td><input id="dsdjh" name="dsdjh"/></td>
+                <td style="padding-left: 50px">国税登记号</td>
+                <td><input id="gsdjh" name="gsdjh"/></td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+</body>
+<script type="text/javascript" src="{% static '/js/jquery.cookie.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/customer/customer.js' %}"></script>
+</html>

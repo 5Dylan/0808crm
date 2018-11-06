@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>关联权限</title>
+    <link rel="stylesheet" href="{% static '/ztree/css/zTreeStyle/zTreeStyle.css' %}" type="text/css">
+    <script type="text/javascript" src="{% static '/ztree/js/jquery-1.4.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ztree/js/jquery.ztree.core.js' %}"></script>
+    <script type="text/javascript" src="{% static '/ztree/js/jquery.ztree.excheck.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+    <script type="text/javascript">
+        var setting = {
+            check: {
+                enable: true,
+                chkboxType: {"Y": "ps", "N": "ps"}
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onCheck: zTreeOnCheck
+            }
+        };
+
+        // 点击checkbox触发事件
+        function zTreeOnCheck() {
+            // 获取 id 为 module_tree 的 zTree 对象
+            var treeObj = $.fn.zTree.getZTreeObj("module_tree");
+            // 获取勾选的节点
+            var nodes = treeObj.getCheckedNodes(true);
+
+            // 所有模块的id数组
+            var module_checked_id = '';
+            for (var i = 0; i < nodes.length; i++) {
+                if (i != nodes.length - 1) {
+                    module_checked_id += nodes[i].id + ',';
+                } else {
+                    module_checked_id += nodes[i].id;
+                }
+            }
+
+            // 请求数据
+            var data = {
+                'module_checked_id': module_checked_id,
+                'role_id': {{ role.id }}
+            }
+
+            // 发送请求
+            $.post('/system/role_relate_module/', data, function (result) {
+                if (200 == result.code) {
+                    $.messager.show({
+                        title: '系统提示',
+                        msg: result.msg,
+                        timeout: 5000
+                    });
+                }
+            });
+        };
+
+        var zNodes = [];
+        {% for m in module %}
+            zNodes.push({
+                id: {{ m.id }},
+                pId: {{ m.parent|default:0 }},
+                name: '{{ m.moduleName }}',
+                open: true,
+                checked: {{ m.checked }}
+            });
+        {% endfor %}
+
+        $(document).ready(function () {
+            // 初始化zTree
+            $.fn.zTree.init($("#module_tree"), setting, zNodes);
+        });
+    </script>
+</head>
+<body>
+<div style="margin: 20px" class="content_wrap">
+    <h3>角色【{{ role.roleName }}】资源授权</h3>
+    <div class="zTreeDemoBackground left">
+        <ul id="module_tree" class="ztree"></ul>
+    </div>
+</div>
+</body>
+</html>

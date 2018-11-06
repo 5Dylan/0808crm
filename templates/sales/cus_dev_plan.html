@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>客户开发计划管理</title>
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/default/easyui.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/jquery-easyui-1.3.3/themes/icon.css' %}">
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/jquery.easyui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static '/jquery-easyui-1.3.3/locale/easyui-lang-zh_CN.js' %}"></script>
+</head>
+<body>
+<div style="margin:5px 0;"></div>
+<table id="dg" class="easyui-datagrid" title="客户开发计划管理"
+       data-options="rownumbers:true,pagination:true,fit:true,
+			    pageList:[10,15,20,30,40,50],toolbar: '#tb',
+                url:'{% url 'sales:select_sale_chacne_for_cus_dev_plan' %}',method:'post'">
+    <thead>
+    <tr>
+        <th data-options="field:'id',checkbox:true"></th>
+        <th data-options="field:'khno',width:90">客户编号</th>
+        <th data-options="field:'customerName',width:164">客户名称</th>
+        <th data-options="field:'overview',width:160">概要</th>
+        <th data-options="field:'createMan',width:90">创建人</th>
+        <th data-options="field:'linkManName',width:90">联系人</th>
+        <th data-options="field:'linkPhone',width:100">联系电话</th>
+        <th data-options="field:'assignMan',width:80">分配给谁</th>
+        <th data-options="field:'assignTime',width:150,formatter:formatter_datetime">分配时间</th>
+        <th data-options="field:'devResult',width:80,align:'center',formatter:formatter_devResult">开发状态</th>
+        <th data-options="field:'handler',width:80,align:'center',formatter:handler">操作</th>
+    </tr>
+    </thead>
+</table>
+
+{# 工具栏 #}
+<div id="tb">
+    <div>
+        客户名称&nbsp;&nbsp;<input id="customerName" onkeydown="if (event.keyCode==13) select_params_sela_chance();"/>
+        &nbsp;&nbsp;概要&nbsp;&nbsp;<input id="overview" onkeydown="if (event.keyCode==13) select_params_sela_chance();"/>
+        &nbsp;&nbsp;开发状态&nbsp;&nbsp;
+        <select class="easyui-combobox" id="devResult" style="width: 100px">
+            <option value="">全部</option>
+            <option value="0">未开发</option>
+            <option value="1">开发中</option>
+            <option value="2">开发完成</option>
+            <option value="3">开发失败</option>
+        </select>&nbsp;&nbsp;
+        <a id="btn" onclick="select_params_sela_chance();" class="easyui-linkbutton"
+           data-options="iconCls:'icon-search'">查询</a>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="{% static '/js/jquery.cookie.js' %}"></script>
+<script type="text/javascript" src="{% static '/js/sales/cus_dev_plan.js' %}"></script>
+</html>
