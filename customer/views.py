@@ -9,6 +9,7 @@ from crm.common import Message, permission_required
 from random import randint
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 
 
 # -----------------------------------客户信息管理-------------------start-------------------
@@ -66,27 +67,47 @@ def select_customer_list(request):
     try:
         # 获取第几页
         page_num = request.GET.get('page')  # 添加默认值，防止没有参数导致的异常错误
-
         # 获取每页多少条
         page_size = request.GET.get('rows')  # 添加默认值，防止没有参数导致的异常错误
 
-        # 查询
-        object_list = Customer.objects.values().all().order_by('-id')
-
         # 接收参数
-        name = request.GET.get('name')
-        khno = request.GET.get('khno')
-        state = request.GET.get('state')
+        name = request.GET.get('name', '')  # 没有值为None
+        khno = request.GET.get('khno', '')
+        state = request.GET.get('state', '')
 
-        # 如果有条件则过滤查询
-        if name:
-            object_list = object_list.filter(name__icontains=name)
+        '''
+            由于该功能可以带条件查询，所以key也必须多样化
+            无条件查询
+                customer:name_:khno_:state_
+            有条件查询
+                customer:name_zhangsan:khno_:state_
+                customer:name_:khno_2018001:state_
+                customer:name_:khno_:state_1
+                customer:name_zhangsan:khno_2018001:state_1
+        '''
+        # 判断Redis中是否有缓存数据
+        redis_key = 'customer:name_' + name + ':khno_' + khno + ':state_' + state
+        redis_value = cache.get(redis_key)
 
-        if khno:
-            object_list = object_list.filter(khno__icontains=khno)
+        object_list = None
+        if redis_value and len(redis_value) > 0:
+            object_list = redis_value
+        else:
+            # 查询
+            object_list = Customer.objects.values().all().order_by('-id')
 
-        if state:
-            object_list = object_list.filter(state=state)
+            # 如果有条件则过滤查询
+            if name:
+                object_list = object_list.filter(name__icontains=name)
+
+            if khno:
+                object_list = object_list.filter(khno__icontains=khno)
+
+            if state:
+                object_list = object_list.filter(state=state)
+
+            # 查询出结果放入redis缓存
+            cache.set(redis_key, object_list, 3600)
 
         # 初始化分页对象
         p = Paginator(object_list, page_size)
@@ -124,6 +145,12 @@ def create_customer(request):
         # 添加信息
         data['khno'] = khno
         Customer.objects.create(**data)
+
+        # 清除缓存信息
+        redis_keys = cache.keys('customer*')  # 模糊匹配所有kye，返回列表
+        for k in redis_keys:
+            cache.delete(k)
+
         # return JsonResponse({'code': 200, 'msg': '添加成功'})
         return JsonResponse(Message(msg='添加成功').result())
     except Exception as e:
@@ -157,6 +184,12 @@ def update_customer(request):
         # 修改信息
         data['updateDate'] = datetime.now()
         Customer.objects.filter(pk=id).update(**data)
+
+        # 清除缓存信息
+        redis_keys = cache.keys('customer*')  # 模糊匹配所有kye，返回列表
+        for k in redis_keys:
+            cache.delete(k)
+
         # return JsonResponse({'code': 200, 'msg': '添加成功'})
         return JsonResponse(Message(msg='修改成功').result())
     except Exception as e:
@@ -173,6 +206,12 @@ def delete_customer(request):
         ids = ids.split(',')
         # 删除
         cs = Customer.objects.filter(pk__in=ids).update(isValid=0, updateDate=datetime.now())
+
+        # 清除缓存信息
+        redis_keys = cache.keys('customer*')  # 模糊匹配所有kye，返回列表
+        for k in redis_keys:
+            cache.delete(k)
+
         return JsonResponse(Message(msg='删除成功').result())
     except Exception as e:
         pass

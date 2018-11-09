@@ -120,15 +120,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# Django自带admin应用显示语言zh-Hans是简体中文 zh-Hant是繁体中文
+LANGUAGE_CODE = 'zh-Hans'
 
-TIME_ZONE = 'UTC'
+# 亚洲中国上海时区时间
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = False  # 使用系统当前时间
+USE_TZ = True  # False使用系统当前时间
 
 
 # Static files (CSS, JavaScript, Images)
@@ -169,3 +171,22 @@ LOGGING = {
         },
     },
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",  # django的cache模块
+        "LOCATION": "redis://192.168.10.200:6379/0",  # 远程redis的ip:端口/库
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",  # 默认redis客户端
+            "CONNECTION_POOL_KWARGS": {"max_connections": 100},  # 最大连接数
+            "PASSWORD": "root",  # 密码
+            "PICKLE_VERSION": -1,  # 指定pickle的序列化版本
+            "SOCKET_CONNECT_TIMEOUT": 2,  # 单位秒，连接redis的超时时间
+            "SOCKET_TIMEOUT": 2,  # 单位秒，是执行redis命令的超时时间
+        }
+    }
+}
+# 缓存存储session会话
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+# 使用的缓存别名（默认内存缓存）
+SESSION_CACHE_ALIAS = 'default'
